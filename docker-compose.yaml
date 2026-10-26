@@ -1,0 +1,40 @@
+services:
+  profileforge:
+    build: .
+    image: profileforge:local
+    ports:
+      - "${APP_PORT:-5000}:5000"
+    environment:
+      SECRET_KEY: ${SECRET_KEY:-change-this-secret-before-deployment}
+      DATABASE_URL: ${DATABASE_URL:-sqlite:///profileforge.db}
+    volumes:
+      - profileforge-data:/app/instance
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD","python","-c","import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  mysql:
+    image: mysql:8.4
+    profiles: ["mysql"]
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-profileforge}
+      MYSQL_USER: ${MYSQL_USER:-profileforge}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-replace-this-password}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-replace-this-root-password}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL","mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+volumes:
+  profileforge-data:
+  mysql-data:
