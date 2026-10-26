@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: profile-forgr-deployment
+  namespace: profile-forgr
+  labels:
+    app: profile-forgr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: profile-forgr
+  template:
+    metadata:
+      labels:
+        app: profile-forgr
+    spec:
+      containers:
+      - name: profile-forgr
+        image: adnan313/profileforge:v1
+        ports:
+        - containerPort: 80
+
